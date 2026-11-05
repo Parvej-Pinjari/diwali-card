@@ -197,9 +197,19 @@ footer .creator strong{color:var(--gold);font-weight:700}
 .welcome-diya{font-size:58px;line-height:1.2;filter:drop-shadow(0 0 18px rgba(255,190,70,.8));animation:pulse 2s ease-in-out infinite}
 .welcome-title{font-family:var(--display);font-size:clamp(28px,8vw,42px);color:var(--gold);margin:12px 0 8px}
 .welcome-copy{font-size:16px;color:var(--cream);opacity:.85}
-.welcome-action{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:22px;padding:13px 23px;
-  border-radius:999px;background:linear-gradient(135deg,#ffd75e,#ff8a1a);color:#2a1100;font-weight:700}
-#welcomeStatus{min-height:1.4em;margin-top:12px;font-size:13px;color:var(--gold)}
+.welcome-action{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:24px;padding:15px 28px;
+  border-radius:999px;background:linear-gradient(135deg,#ffe27a,#ff8a1a);color:#2a1100;font-weight:700;font-size:17px;
+  border:2px solid #fff3b0;box-shadow:0 0 22px 4px rgba(255,190,70,.75),0 0 60px 12px rgba(255,120,30,.4);
+  animation:ctaPulse 1.4s ease-in-out infinite}
+.welcome-action::before,.welcome-action::after{content:"";position:absolute;inset:-4px;border-radius:999px;border:2px solid var(--gold);pointer-events:none;animation:ctaRing 1.8s ease-out infinite}
+.welcome-action::after{animation-delay:.9s}
+.welcome-action::after{content:"👆";position:absolute;inset:auto;right:-6px;bottom:-30px;border:0;font-size:26px;animation:ctaTap 1s ease-in-out infinite}
+@keyframes ctaPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes ctaRing{from{transform:scale(1);opacity:.9}to{transform:scale(1.35,1.7);opacity:0}}
+@keyframes ctaTap{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.welcome-box{animation:boxGlow 2.4s ease-in-out infinite alternate}
+@keyframes boxGlow{from{box-shadow:0 0 35px rgba(255,160,40,.2)}to{box-shadow:0 0 80px rgba(255,190,70,.5)}}
+#welcomeStatus{min-height:1.4em;margin-top:40px;font-size:13px;color:var(--gold)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
