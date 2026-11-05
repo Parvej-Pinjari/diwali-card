@@ -1,4 +1,13 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<div id="welcomeGate" role="button" tabindex="0" aria-label="Tap to enter and play Diwali music">
+  <div class="welcome-box">
+    <div class="welcome-diya">🪔</div>
+    <h2 class="welcome-title">शुभ दीपावली</h2>
+    <p class="welcome-copy">A little light, a little music, and lots of happiness.</p>
+    <div class="welcome-action">✨ Tap anywhere to enter &amp; play music</div>
+    <p id="welcomeStatus" aria-live="polite">Tap to begin your celebration</p>
+  </div>
+</div>
 <title>Shubh Deepavali Card</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,6 +186,20 @@ footer .creator strong{color:var(--gold);font-weight:700}
   html{scroll-behavior:auto}
   .lantern,.petal{display:none}
 }
+
+/* First-visit music gate */
+#welcomeGate{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;
+  background:rgba(8,4,20,.68);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+  opacity:1;transition:opacity .8s ease,visibility .8s ease;cursor:pointer;text-align:center}
+#welcomeGate.hide{opacity:0;visibility:hidden;pointer-events:none}
+.welcome-box{max-width:420px;padding:30px 24px;border:1px solid rgba(255,200,80,.55);border-radius:24px;
+  background:rgba(35,13,54,.88);box-shadow:0 0 55px rgba(255,160,40,.2)}
+.welcome-diya{font-size:58px;line-height:1.2;filter:drop-shadow(0 0 18px rgba(255,190,70,.8));animation:pulse 2s ease-in-out infinite}
+.welcome-title{font-family:var(--display);font-size:clamp(28px,8vw,42px);color:var(--gold);margin:12px 0 8px}
+.welcome-copy{font-size:16px;color:var(--cream);opacity:.85}
+.welcome-action{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:22px;padding:13px 23px;
+  border-radius:999px;background:linear-gradient(135deg,#ffd75e,#ff8a1a);color:#2a1100;font-weight:700}
+#welcomeStatus{min-height:1.4em;margin-top:12px;font-size:13px;color:var(--gold)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -490,12 +513,14 @@ async function musicStart(){
     setPill('#mus',true,'Music');
     $('#mhint').hidden=true;
     $('#mus').classList.remove('nudge');
+    return true;
   }catch(err){
     // Keep the control truthful when the browser blocks audible autoplay.
     musicStarted=false;
     $('#mus').setAttribute('aria-pressed','false');
     $('#mus span').textContent='Tap for music';
     $('#mus').classList.add('nudge');
+    return false;
   }
 }
 function musicStop(){
@@ -548,15 +573,26 @@ $('#mus').addEventListener('click',e=>{
     setPill('#mus',false,'Music');
   }
 });
-/* Try audible autoplay immediately; if blocked, start on first user interaction. */
-const UNLOCK=['pointerdown','touchend','click','keydown'];
-function tryStart(e){
-  if(!musicOn||musicStarted)return;
-  musicStart();
-  if(musicStarted)UNLOCK.forEach(t=>removeEventListener(t,tryStart,true));
+/* The welcome gate dims the page until the visitor taps to start music. */
+const welcomeGate=$('#welcomeGate');
+let gateBusy=false;
+async function enterExperience(){
+  if(gateBusy||welcomeGate.classList.contains('hide'))return;
+  gateBusy=true;
+  $('#welcomeStatus').textContent='Starting music...';
+  const started=await musicStart();
+  if(started){
+    welcomeGate.classList.add('hide');
+    welcomeGate.setAttribute('aria-hidden','true');
+  }else{
+    $('#welcomeStatus').textContent='Music could not start. Tap again to retry.';
+  }
+  gateBusy=false;
 }
-UNLOCK.forEach(t=>addEventListener(t,tryStart,true));
-musicStart();
+welcomeGate.addEventListener('click',enterExperience);
+welcomeGate.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();enterExperience()}
+});
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){
     if(ac)ac.suspend();
